@@ -24,10 +24,14 @@ REBOL [
 		0.0.1	Copied from my existing specific searches
 				GOAL: create a generic base object! that will do everything
 				necessary to provide a user designed search from Windows Explorer
+		0.1.0	All new structure.  After running the script, you call opensearch with
+					an object that implements the 'search function, optionally implementing
+					a 'load function which get called by opensearch on startup and every
+					hour to refresh.
 	}
-	Requires: {
+	Requires: [
 		%sysmon.r [log-app]
-	}
+	]
 ]
 
 ;
