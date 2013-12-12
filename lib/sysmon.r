@@ -1,4 +1,4 @@
-REBOL [ 
+REBOL [
 	Title: "Utility functions for memory and timing"
     Date: 22-Oct-2013 "or thereabouts"
 	File: %sysmon.r
@@ -7,12 +7,15 @@ REBOL [
 sysmon.r: true
 
 abbrev-bytes: use [limits][limits: [1073741824 GB 1048576 MB 1024 KB 1 B]
-    func [bytes [number!]][
+    func [
+        "Turns big numbers into their KB, MB or GB representation"
+        bytes [number!]
+    ][
         limits: head limits forskip limits 2 [
             if bytes > limits/1 [
-                return reduce [round/to (bytes / limits/1) .1 limits/2]
+                return join round/to (bytes / limits/1) .1 limits/2
             ]
-        ] 
+        ]
     ]
 ]
 
@@ -21,7 +24,7 @@ mem: does[abbrev-bytes stats]
 memuse: use[blk][
     blk: make block! 25
     func [
-        "Returns the number of bytes used since memory counter was last checked" 
+        "Returns the number of bytes used since memory counter was last checked"
         'counter-name [string! word!] "Unique name for this counter"
         /clr
         /local mem previous
@@ -32,7 +35,7 @@ memuse: use[blk][
     ]
 ]
 
-log-app: use [last-time initial-mem last-mem] [
+*.: use [last-time initial-mem last-mem] [
     last-time: now/time/precise
     initial-mem: last-mem: stats
     func [
@@ -42,8 +45,17 @@ log-app: use [last-time initial-mem last-mem] [
         /local log-time log-mem memdiff
     ][
         log-time: now/time/precise log-mem: stats
-        message: reduce [now/time/precise abbrev-bytes log-mem - last-mem abbrev-bytes log-mem - initial-mem abbrev-bytes log-mem reduce message] 
+        message: rejoin [now/time/precise either log-mem > last-mem [" +"][#" "] abbrev-bytes log-mem - last-mem #" " abbrev-bytes log-mem #" " reduce message]
         last-time: log-time last-mem: log-mem
         print message
     ]
+]
+
+words-with-vals: has [word-list] [
+    ; Poached from http://www.codeconscious.com/rebol/tips-and-techniques.html w Larrry Palmiter's accrediting there
+    word-list: copy []
+    foreach word first rebol/words [
+        if not error? try [get in rebol/words :word] [append word-list word]
+    ]
+    word-list
 ]
